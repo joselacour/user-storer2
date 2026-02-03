@@ -1,0 +1,9 @@
+C:\simplepath\quarkus\user-storer\src\main\java\aws\DynamoDbClientProducer.java
+C:\simplepath\quarkus\user-storer\src\main\java\controller\UserController.java
+C:\simplepath\quarkus\user-storer\src\main\java\dto\ErrorOutputDTO.java
+C:\simplepath\quarkus\user-storer\src\main\java\dto\UserCreateInputDTO.java
+C:\simplepath\quarkus\user-storer\src\main\java\dto\UserOutputDTO.java
+C:\simplepath\quarkus\user-storer\src\main\java\model\converter\InstantAttributeConverter.java
+C:\simplepath\quarkus\user-storer\src\main\java\model\User.java
+C:\simplepath\quarkus\user-storer\src\main\java\repository\UserRepository.java
+C:\simplepath\quarkus\user-storer\src\main\java\service\UserService.java
