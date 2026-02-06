@@ -8,6 +8,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 
 import java.time.Instant;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -23,6 +24,9 @@ public class User {
     private String email;
     @ToString.Exclude
     private String password;
+
+    // No necesita un converter, DynamoDB mapea Set<String> directamente a SS
+    private Set<String> roles;
 
     //En el fondo dynamodb requiere un Epoch time entonces usamos un converter que esta en moderl.converter
     private Instant lastLogin;
@@ -58,5 +62,4 @@ public class User {
         return email;
     }
 
-    
 }

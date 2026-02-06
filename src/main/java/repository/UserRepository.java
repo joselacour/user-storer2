@@ -116,4 +116,9 @@ public class UserRepository {
                 .map(user -> user != null);
     }
 
+    public Uni<Boolean> existsByEmail(String email) {
+        return findByEmail(email)
+                .map(user -> user != null);
+    }
+
 }

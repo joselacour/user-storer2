@@ -1,9 +1,6 @@
-dto\UserOutputDTO.class
-repository\UserRepository.class
-dto\UserCreateInputDTO.class
-model\converter\InstantAttributeConverter.class
 controller\UserController.class
-aws\DynamoDbClientProducer.class
 service\UserService.class
+repository\UserRepository.class
+model\converter\InstantAttributeConverter.class
+config\DynamoDbClientProducer.class
 model\User.class
-dto\ErrorOutputDTO.class

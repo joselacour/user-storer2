@@ -1,5 +1,6 @@
 package controller;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -11,9 +12,9 @@ import java.time.Instant;
 
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 
-import dto.ErrorOutputDTO;
-import dto.UserCreateInputDTO;
-import dto.UserOutputDTO;
+import dto.ErrorResponseDTO;
+import dto.UserCreateRequestDTO;
+import dto.UserResponseDTO;
 import io.smallrye.mutiny.Uni;
 import model.User;
 import service.UserService;
@@ -30,10 +31,11 @@ public class UserController {
 
     @POST
     @Path("/")
+    @RolesAllowed({"ADMIN", "USER"})
     @Consumes(MediaType.APPLICATION_JSON)
     @APIResponse(responseCode = "201", description = "User created successfully")
     @APIResponse(responseCode = "400", description = "Bad request")
-    public Uni<Response> create(@Valid UserCreateInputDTO input) {
+    public Uni<Response> create(@Valid UserCreateRequestDTO input) {
         User user = new User();
         user.setUsername(input.getUsername());
         user.setPassword(input.getPassword());
@@ -41,7 +43,7 @@ public class UserController {
 
         return userService.create(user)
             .map(savedUser -> {
-                UserOutputDTO dto = new UserOutputDTO(
+                UserResponseDTO dto = new UserResponseDTO(
                     savedUser.getId(),
                     savedUser.getUsername(),
                     savedUser.getEmail(),
@@ -52,7 +54,7 @@ public class UserController {
                 return Response.status(Response.Status.CREATED).entity(dto).build();
             })
             .onFailure().recoverWithItem(throwable -> {
-                ErrorOutputDTO err = new ErrorOutputDTO(
+                ErrorResponseDTO err = new ErrorResponseDTO(
                     Response.Status.BAD_REQUEST.getStatusCode(),
                     "Error creating user",
                     throwable.getMessage(),
@@ -67,14 +69,15 @@ public class UserController {
 
     @GET
     @Path("/")
+    //@RolesAllowed({"ADMIN", "USER"})
     @APIResponse(responseCode = "200", description = "Users founds successfully")
     @APIResponse(responseCode = "500", description = "Internal server error")
-    // A manera de debug estoy segira devolviendo user y no el DTO, para poder ver todos los campos
+    // A manera de debug estoy segira devolviendo user y no el DTO, para poder ver todos los campos y no requiere permisos
     public Uni<Response> findAll() {
         return userService.findAll()
             .map(users -> Response.ok(users).build())
             .onFailure().recoverWithItem(throwable -> {
-                ErrorOutputDTO err = new ErrorOutputDTO(
+                ErrorResponseDTO err = new ErrorResponseDTO(
                     Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                     "Error retrieving users",
                     throwable.getMessage(),
@@ -91,6 +94,7 @@ public class UserController {
 
 	@GET
 	@Path("/{id}")
+    @RolesAllowed({"ADMIN", "USER"})
     @APIResponse(responseCode = "200", description = "User found successfully")
     @APIResponse(responseCode = "404", description = "User not found")
     @APIResponse(responseCode = "500", description = "Internal server error")
@@ -98,11 +102,18 @@ public class UserController {
 		return userService.findById(id)
                .map(user -> {
                    if (user == null) {
-                       return Response.status(Response.Status.NOT_FOUND)
-                               .entity("User with id " + id + " not found")
+                          ErrorResponseDTO err = new ErrorResponseDTO(
+                            Response.Status.NOT_FOUND.getStatusCode(),
+                            "User not found",
+                            "User with id " + id + " not found",
+                            Instant.now(),
+                            null // de momento no devolvemos el user ya que no manejamos sesion 
+                        );
+                        return Response.status(Response.Status.NOT_FOUND)
+                               .entity(err)
                                .build();
                    }
-                    UserOutputDTO dto = new UserOutputDTO(
+                    UserResponseDTO dto = new UserResponseDTO(
                     user.getId(),
                     user.getUsername(),
                     user.getEmail(),
@@ -113,7 +124,7 @@ public class UserController {
                    return Response.ok(dto).build();
                })
                .onFailure().recoverWithItem(throwable -> {
-                   ErrorOutputDTO err = new ErrorOutputDTO(
+                   ErrorResponseDTO err = new ErrorResponseDTO(
                        Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                        "Error retrieving user",
                        throwable.getMessage(),
@@ -128,6 +139,7 @@ public class UserController {
 
     @GET
     @Path("/searchby/email")
+    @RolesAllowed({"ADMIN", "USER"})
     @APIResponse(responseCode = "200", description = "User found successfully")
     @APIResponse(responseCode = "404", description = "User not found")
     public Uni<Response> findByEmail(@QueryParam("email") String email) {
@@ -138,7 +150,7 @@ public class UserController {
                         .entity("User with email " + email + " not found")
                         .build();
                 }
-                UserOutputDTO dto = new UserOutputDTO(
+                UserResponseDTO dto = new UserResponseDTO(
                     user.getId(),
                     user.getUsername(),
                     user.getEmail(),
@@ -149,7 +161,7 @@ public class UserController {
                 return Response.ok(dto).build();
             })
             .onFailure().recoverWithItem(throwable -> {
-                ErrorOutputDTO err = new ErrorOutputDTO(
+                ErrorResponseDTO err = new ErrorResponseDTO(
                     Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                     "Error retrieving user by email",
                     throwable.getMessage(),
@@ -164,6 +176,7 @@ public class UserController {
 
     @GET
     @Path("/searchby/username")
+    @RolesAllowed({"ADMIN", "USER"})
     @APIResponse(responseCode = "200", description = "User found successfully")
     @APIResponse(responseCode = "404", description = "User not found")
     public Uni<Response> findByUsername(@QueryParam("username") String username) {
@@ -174,7 +187,7 @@ public class UserController {
                         .entity("User with username " + username + " not found")
                         .build();
                 }
-                UserOutputDTO dto = new UserOutputDTO(
+                UserResponseDTO dto = new UserResponseDTO(
                     user.getId(),
                     user.getUsername(),
                     user.getEmail(),
@@ -185,7 +198,7 @@ public class UserController {
                 return Response.ok(dto).build();
             })
             .onFailure().recoverWithItem(throwable -> {
-                ErrorOutputDTO err = new ErrorOutputDTO(
+                ErrorResponseDTO err = new ErrorResponseDTO(
                     Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                     "Error retrieving user by username",
                     throwable.getMessage(),
@@ -200,13 +213,14 @@ public class UserController {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed({"ADMIN", "USER"})
     @APIResponse(responseCode = "204", description = "User deleted successfully")
     @APIResponse(responseCode = "404", description = "User not found")
     public Uni<Response> delete(@PathParam("id") String id) {
         return userService.delete(id)
             .map(v -> Response.noContent().build())
             .onFailure().recoverWithItem(throwable -> {
-                ErrorOutputDTO err = new ErrorOutputDTO(
+                ErrorResponseDTO err = new ErrorResponseDTO(
                     Response.Status.NOT_FOUND.getStatusCode(),
                     "Error deleting user",
                     throwable.getMessage(),

@@ -39,22 +39,42 @@ public class UserService {
                                 .failure(new IllegalArgumentException(
                                         "User with id " + user.getId() + " already exists"));
                     }
-                    // TAG: FALTA agregar la validacion para el UUID valido
-                    user.setCreated(Instant.now());
-                    user.setModified(Instant.now());
-                    
-                    user.setPassword(passwordEncoder.encode(user.getPassword()));
-                    
-                    return userRepository.save(user);
-                });
+                    // Verificar que no exista otro user con el mismo email luego validamos el email unico
+                    return userRepository.existsByEmail(user.getEmail())
+                            .onItem().transformToUni(emailExists -> {
+                                if (emailExists) {
+                                    return Uni.createFrom()
+                                            .failure(new IllegalArgumentException(
+                                                    "User with email " + user.getEmail() + " already exists"));
+                                }
+                                // TAG: FALTA agregar la validacion para el UUID valido
+                                user.setCreated(Instant.now());
+                                user.setModified(Instant.now());
+                                user.setPassword(passwordEncoder.encode(user.getPassword()));
+                                return userRepository.save(user);
+                            });
+                }).onFailure().transform(throwable -> 
+                    new IllegalArgumentException("Error creating user: " + throwable.getMessage(), throwable)
+                );
         }
         
-        // Si no viene con ID, generar uno nuevo
-        user.setId(UUID.randomUUID().toString());
-        user.setCreated(Instant.now());
-        user.setModified(Instant.now());
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        
+        // Si no viene con ID, verificar email unico y generar uno nuevo con uuid para su id
+        return userRepository.existsByEmail(user.getEmail())
+                .onItem().transformToUni(emailExists -> {
+                    if (emailExists) {
+                        return Uni.createFrom()
+                                .failure(new IllegalArgumentException(
+                                        "User with email " + user.getEmail() + " already exists"));
+                    }
+                    user.setId(UUID.randomUUID().toString());
+                    user.setCreated(Instant.now());
+                    user.setModified(Instant.now());
+                    user.setPassword(passwordEncoder.encode(user.getPassword()));
+                    return userRepository.save(user);
+                }).onFailure().transform(throwable -> 
+                    new IllegalArgumentException("Error creating user: " + throwable.getMessage(), throwable)
+                );
     }
     
     // Forma fluida no es valida en esta version de Mutiny pero usa .ifTrue que es mas limpio

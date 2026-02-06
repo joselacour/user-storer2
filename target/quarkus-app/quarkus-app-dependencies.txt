@@ -173,6 +173,7 @@ software.amazon.awssdk:regions::jar:2.41.11
 software.amazon.awssdk:retries-spi::jar:2.41.11
 software.amazon.awssdk:retries::jar:2.41.11
 software.amazon.awssdk:sdk-core::jar:2.41.11
+software.amazon.awssdk:secretsmanager::jar:2.41.11
 software.amazon.awssdk:third-party-jackson-core::jar:2.41.11
 software.amazon.awssdk:utils-lite::jar:2.41.11
 software.amazon.awssdk:utils::jar:2.41.11

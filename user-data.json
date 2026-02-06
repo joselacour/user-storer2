@@ -1,0 +1,32 @@
+{
+  "User": [
+    {
+      "PutRequest": {
+        "Item": {
+          "id":        { "S": "3f1c9e6a-9b3f-4d7f-8f0c-0e5b9a6d1c21" },
+          "username":  { "S": "user" },
+          "email":     { "S": "user@user.com" },
+          "password":  { "S": "$2a$12$KfWCiev0qAuoc8E1.cBJxeIICe/tvt.4SvFaRJfP4vj9419Qq78Ei" },
+          "roles":     { "SS": ["USER"] },
+          "created":   { "N": "1706800000" },
+          "modified":  { "N": "1706800000" },
+          "lastLogin": { "N": "1706800500" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "id":        { "S": "a7b2d4c9-1e6f-4a3e-9c8d-2f5e7b1a0d44" },
+          "username":  { "S": "jose" },
+          "email":     { "S": "jose@jose.com" },
+          "password":  { "S": "$2a$12$n8y5gLXPMcmA6AoVV.8s5eJLe.uDBYiD/C6.d8Q.ZHyGzK6cLOghq" },
+          "roles":     { "SS": ["ADMIN", "USER"] },
+          "created":   { "N": "1706801000" },
+          "modified":  { "N": "1706801000" },
+          "lastLogin": { "N": "1706802000" }
+        }
+      }
+    }
+  ]
+}
